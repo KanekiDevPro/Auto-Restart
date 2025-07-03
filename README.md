@@ -32,6 +32,7 @@ A Bash utility to automate restarting systemd services at specific times or inte
 2. **Set Execute Permissions**:
    ```bash
    chmod +x AutoRestart.sh
+   sudo ./AutoRestart.sh
    ```
 
 ## Usage
@@ -39,7 +40,7 @@ A Bash utility to automate restarting systemd services at specific times or inte
 Run the script with root privileges:
 
 ```bash
-sudo ./AutoRestart.sh
+bash <(curl -sSL https://raw.githubusercontent.com/KanekiDevPro/Auto-Restart/main/AutoRestart.sh)
 ```
 
 ### Main Menu Options
