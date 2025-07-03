@@ -58,14 +58,14 @@ sudo ./AutoRestart.sh
 ### Example
 
 To configure `nginx.service` to restart daily at 03:00:
-1. Run `sudo ./setup-auto-restart.sh`.
+1. Run `sudo ./AutoRestart.sh`.
 2. Select option `1`.
 3. Enter `nginx.service` as the service name.
 4. Choose option `1` (specific time) and enter `03:00`.
 5. Optionally test the restart immediately.
 
 To remove the configuration:
-1. Run `sudo ./setup-auto-restart.sh`.
+1. Run `sudo ./AutoRestart.sh`.
 2. Select option `2`.
 3. Enter `nginx.service` to delete the associated files.
 
