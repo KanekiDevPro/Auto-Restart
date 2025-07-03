@@ -25,13 +25,13 @@ A Bash utility to automate restarting systemd services at specific times or inte
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/YourUsername/SystemdAutoRestart.git
+   git clone https://github.com/KanekiDevPro/AutoRestart.sh
    cd SystemdAutoRestart
    ```
 
 2. **Set Execute Permissions**:
    ```bash
-   chmod +x setup-auto-restart.sh
+   chmod +x AutoRestart.sh
    ```
 
 ## Usage
@@ -39,7 +39,7 @@ A Bash utility to automate restarting systemd services at specific times or inte
 Run the script with root privileges:
 
 ```bash
-sudo ./setup-auto-restart.sh
+sudo ./AutoRestart.sh
 ```
 
 ### Main Menu Options
