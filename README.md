@@ -100,7 +100,3 @@ Contributions are welcome! Please:
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
-## Contact
-
-For issues or suggestions, open an issue on GitHub or contact [YourUsername] at [your-email@example.com].
