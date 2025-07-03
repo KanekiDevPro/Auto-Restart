@@ -25,8 +25,8 @@ A Bash utility to automate restarting systemd services at specific times or inte
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/KanekiDevPro/AutoRestart.sh
-   cd SystemdAutoRestart
+   git clone https://github.com/KanekiDevPro/Auto-Restart.git
+   cd Auto-Restart
    ```
 
 2. **Set Execute Permissions**:
