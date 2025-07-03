@@ -1,103 +1,118 @@
+
 # SystemdAutoRestart
 
 A Bash utility to automate restarting systemd services at specific times or intervals with a user-friendly interface.
 
+---
+
 ## Overview
 
-`SystemdAutoRestart` is a Bash script designed to simplify the process of configuring automatic restarts for systemd services on Linux systems. With an intuitive interface, it allows users to schedule restarts either at a specific time daily or at regular intervals (e.g., every X hours). The script also provides functionality to remove existing auto-restart configurations, making it a versatile tool for system administrators.
+SystemdAutoRestart is a Bash script designed to simplify the process of configuring automatic restarts for systemd services on Linux systems. With an intuitive interface, it allows users to schedule restarts either at a specific time daily or at regular intervals (e.g., every X hours). The script also provides functionality to remove existing auto-restart configurations, making it a versatile tool for system administrators.
+
+---
 
 ## Features
 
-- **Automated Service Restarts**: Configure systemd services to restart automatically at a specified time (e.g., 03:00 daily) or at regular intervals (e.g., every 8 hours).
-- **User-Friendly Interface**: Clear prompts and colorful output inspired by an Otaku-friendly theme.
-- **Configuration Removal**: Easily remove auto-restart configurations, including associated timers, services, and scripts.
-- **Error Handling**: Robust validation for service names, time formats, and intervals to prevent misconfigurations.
-- **Systemd Integration**: Creates systemd timers and services for reliable and efficient scheduling.
+- Automated Service Restarts: Configure systemd services to restart automatically at a specified time (e.g., 03:00 daily) or at regular intervals (e.g., every 8 hours).
+- User-Friendly Interface: Clear prompts and colorful output inspired by an Otaku-friendly theme.
+- Configuration Removal: Easily remove auto-restart configurations, including associated timers, services, and scripts.
+- Error Handling: Robust validation for service names, time formats, and intervals to prevent misconfigurations.
+- Systemd Integration: Creates systemd timers and services for reliable and efficient scheduling.
+
+---
 
 ## Requirements
 
-- Linux system with `systemd` installed
+- Linux system with systemd installed
 - Bash version 4.x or higher
-- Root privileges (sudo) for execution
+- Root privileges (`sudo`) for execution
 - Basic knowledge of systemd service names (e.g., `nginx.service`, `x-ui.service`)
+
+---
 
 ## Installation
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/KanekiDevPro/Auto-Restart.git
-   cd Auto-Restart
-   ```
+### Method 1: Clone the repository (Manual)
 
-2. **Set Execute Permissions**:
-   ```bash
-   chmod +x AutoRestart.sh
-   sudo ./AutoRestart.sh
-   ```
+```bash
+git clone https://github.com/KanekiDevPro/Auto-Restart.git
+cd Auto-Restart
+chmod +x AutoRestart.sh
+sudo ./AutoRestart.sh
+```
+
+---
+
+### Method 2: Run directly with curl and bash (Quick)
+
+```bash
+sudo bash <(curl -sSL https://raw.githubusercontent.com/KanekiDevPro/Auto-Restart/main/AutoRestart.sh)
+```
+
+> **Note:** This method requires `sudo` because the script needs root privileges to manage systemd services.
+
+---
 
 ## Usage
 
-Run the script with root privileges:
+Run the script with root privileges. The main menu offers:
 
-```bash
-bash <(curl -sSL https://raw.githubusercontent.com/KanekiDevPro/Auto-Restart/main/AutoRestart.sh)
-```
+1. **Configure Auto Restart for a Systemd Service:**  
+   - Enter the exact service name (e.g., `nginx.service`).  
+   - Choose to restart at a specific time daily or at regular intervals.  
+   - The script creates systemd timer, service, and restart script in `/usr/local/bin`.
 
-### Main Menu Options
+2. **Remove Auto Restart Configuration:**  
+   - Enter the service name to delete its auto-restart setup (timer, service, script).
 
-1. **Configure Auto Restart for Systemd Service**:
-   - Enter the exact service name (e.g., `nginx.service`).
-   - Choose to restart at a specific time daily (e.g., `03:00`) or at regular intervals (e.g., every `8` hours).
-   - The script creates a systemd timer, service, and a restart script in `/usr/local/bin`.
+3. **Exit:** Close the script.
 
-2. **Remove Auto Restart Configuration**:
-   - Enter the service name to remove its auto-restart configuration.
-   - The script deletes the associated timer, service, and script files.
+---
 
-3. **Exit**: Closes the script.
+## Examples
 
-### Example
+- To configure `nginx.service` to restart daily at 03:00:  
+  Run the script, select option 1, enter `nginx.service`, choose daily time, and enter `03:00`.
 
-To configure `nginx.service` to restart daily at 03:00:
-1. Run `sudo ./AutoRestart.sh`.
-2. Select option `1`.
-3. Enter `nginx.service` as the service name.
-4. Choose option `1` (specific time) and enter `03:00`.
-5. Optionally test the restart immediately.
+- To remove the configuration:  
+  Run the script, select option 2, and enter the service name.
 
-To remove the configuration:
-1. Run `sudo ./AutoRestart.sh`.
-2. Select option `2`.
-3. Enter `nginx.service` to delete the associated files.
+---
 
 ## Finding Service Names
 
-To list available systemd services:
+You can list available systemd services by running:
+
 ```bash
 systemctl list-units --type=service | grep .service
 ```
 
+---
+
 ## Troubleshooting
 
-- **Script fails with "Service does not exist"**:
-  Ensure the service name is correct. Use `systemctl list-units --type=service` to verify.
-- **Permission errors**:
-  Run the script with `sudo`.
-- **Timer not starting**:
-  Check timer status with:
-  ```bash
-  systemctl status restart-<service-name>.timer
-  ```
+- **"Service does not exist" error:** Verify the service name is correct using the command above.
+- **Permission errors:** Make sure to run the script with `sudo`.
+- **Timer not starting:** Check status with:
+
+```bash
+systemctl status restart-<service-name>.timer
+```
+
+---
 
 ## Contributing
 
 Contributions are welcome! Please:
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/your-feature`).
-3. Commit your changes (`git commit -m "Add your feature"`).
-4. Push to the branch (`git push origin feature/your-feature`).
-5. Open a pull request.
+
+- Fork the repository.
+- Create a new branch (`git checkout -b feature/your-feature`).
+- Commit your changes (`git commit -m "Add your feature"`).
+- Push to the branch (`git push origin feature/your-feature`).
+- Open a pull request.
+
+---
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the MIT License.
