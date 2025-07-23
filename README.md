@@ -1,116 +1,129 @@
-SystemdAutoRestart
+## SystemdAutoRestart
 
 Automate the automatic restart of systemd services on Linux with a simple, intuitive Bash utility.
 
-🌟 Key Features
+---
 
-Scheduled Restarts: Restart any systemd service at a fixed time daily (e.g., 03:00) or at regular intervals (e.g., every 8 hours).
+### 🌟 Key Features
 
-User-Friendly Interface: Interactive prompts with clear instructions and colorized output for ease of use.
+- **Scheduled Restarts**: Restart any systemd service at a fixed time daily (e.g., 03:00) or at regular intervals (e.g., every 8 hours).
+- **User-Friendly Interface**: Interactive prompts with clear instructions and colorized output for ease of use.
+- **One-Command Setup**: Quickly configure auto-restart in seconds—no manual file edits required.
+- **Clean Removal**: Remove existing auto-restart configurations effortlessly via the script.
+- **Robust Validation**: Checks service names, time formats, and intervals to prevent errors.
+- **Systemd Integration**: Leverages native systemd timers and service units for reliable scheduling.
 
-One-Command Setup: Quickly configure auto-restart in seconds—no manual file edits required.
+---
 
-Clean Removal: Remove existing auto-restart configurations effortlessly via the script.
+### 📋 Requirements
 
-Robust Validation: Checks service names, time formats, and intervals to prevent errors.
+- **OS**: Any Linux distribution with systemd
+- **Shell**: Bash v4.x or higher
+- **Permissions**: Root access (`sudo`) to manage systemd units
 
-Systemd Integration: Leverages native systemd timers and service units for reliable scheduling.
+---
 
-📋 Requirements
-
-OS: Any Linux distribution with systemd
-
-Shell: Bash v4.x or higher
-
-Permissions: Root access (sudo) to manage systemd units
-
-🚀 Installation
+### 🚀 Installation
 
 Install in one step with root privileges:
 
+```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/KanekiDevPro/Auto-Restart/main/beta.sh) --install
+```
 
-A symlink will be created at /usr/local/bin/systemd-autorestart for easy access.
+> A symlink will be created at `/usr/local/bin/systemd-autorestart` for easy access.
 
-🎛️ Usage
+---
 
-Run the command with sudo:
+### 🎛️ Usage
 
+Run the command with `sudo`:
+
+```bash
 systemd-autorestart
+```
 
-Configure Auto-Restart
+1. **Configure Auto-Restart**
+   - **Service**: Enter the full name (e.g., `nginx.service`).
+   - **Mode**:
+     - **Daily**: Set a specific time (HH:MM) for a once-a-day restart.
+     - **Interval**: Set an hourly interval (X hours).
 
-Service: Enter the full name (e.g., nginx.service).
+2. **Remove Configuration**
+   - Select the service name to delete its timer, unit, and cleanup script.
 
-Mode:
+3. **Exit**  
+   - Close the utility.
 
-Daily: Set a specific time (HH:MM) for a once-a-day restart.
+---
 
-Interval: Set an hourly interval (X hours).
+### 🔍 Examples
 
-Remove Configuration
+- **Restart `nginx.service` daily at 03:00**
 
-Select the service name to delete its timer, unit, and cleanup script.
+  ```bash
+  $ systemd-autorestart
+  (1) Configure  (2) Remove  (3) Exit
+  Select: 1
+  Service name: nginx.service
+  Mode: Daily
+  Time [HH:MM]: 03:00
+  ✅ Auto-restart configured for nginx.service at 03:00 daily.
+  ```
 
-Exit
+- **Restart `x-ui.service` every 8 hours**
 
-Close the utility.
+  ```bash
+  $ sudo systemd-autorestart
+  Select: 1
+  Service name: x-ui.service
+  Mode: Interval
+  Interval [hours]: 8
+  ✅ Auto-restart configured every 8 hours.
+  ```
 
-🔍 Examples
+---
 
-Restart nginx.service daily at 03:00
-
-$ systemd-autorestart
-(1) Configure  (2) Remove  (3) Exit
-Select: 1
-Service name: nginx.service
-Mode: Daily
-Time [HH:MM]: 03:00
-✅ Auto-restart configured for nginx.service at 03:00 daily.
-
-Restart x-ui.service every 8 hours
-
-$ sudo systemd-autorestart
-Select: 1
-Service name: x-ui.service
-Mode: Interval
-Interval [hours]: 8
-✅ Auto-restart configured every 8 hours.
-
-🔧 Manage Configurations
+### 🔧 Manage Configurations
 
 List all active auto-restart timers:
 
+```bash
 systemctl list-timers --all | grep restart-.*\.timer
+```
 
 Check the status of a specific timer:
 
+```bash
 systemctl status restart-<service-name>.timer
+```  
 
-🛠 Troubleshooting
+---
 
-Invalid Service: Ensure correct service name via:
+### 🛠 Troubleshooting
 
-systemctl list-units --type=service --no-pager
+- **Invalid Service**: Ensure correct service name via:
+  ```bash
+  systemctl list-units --type=service --no-pager
+  ```
+- **Permission Denied**: Use `sudo` or run as root.
+- **Timer Inactive**: Start it manually:
+  ```bash
+  sudo systemctl enable --now restart-<service-name>.timer
+  ```
 
-Permission Denied: Use sudo or run as root.
+---
 
-Timer Inactive: Start it manually:
+### 🤝 Contributing
 
-sudo systemctl enable --now restart-<service-name>.timer
+1. Fork the repo  
+2. Create a feature branch (`git checkout -b feature/your-feature`)  
+3. Commit changes (`git commit -m "Add feature"`)  
+4. Push (`git push origin feature/your-feature`)  
+5. Open a Pull Request
 
-🤝 Contributing
+---
 
-Fork the repo
-
-Create a feature branch (git checkout -b feature/your-feature)
-
-Commit changes (git commit -m "Add feature")
-
-Push (git push origin feature/your-feature)
-
-Open a Pull Request
-
-📄 License
+### 📄 License
 
 Released under the MIT License.
