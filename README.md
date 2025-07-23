@@ -35,28 +35,6 @@ bash <(curl -fsSL https://raw.githubusercontent.com/KanekiDevPro/Auto-Restart/ma
 
 ---
 
-### 🎛️ Usage
-
-Run the command with `sudo`:
-
-```bash
-systemd-autorestart
-```
-
-1. **Configure Auto-Restart**
-   - **Service**: Enter the full name (e.g., `nginx.service`).
-   - **Mode**:
-     - **Daily**: Set a specific time (HH:MM) for a once-a-day restart.
-     - **Interval**: Set an hourly interval (X hours).
-
-2. **Remove Configuration**
-   - Select the service name to delete its timer, unit, and cleanup script.
-
-3. **Exit**  
-   - Close the utility.
-
----
-
 ### 🔍 Examples
 
 - **Restart `nginx.service` daily at 03:00**
