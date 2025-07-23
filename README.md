@@ -46,7 +46,7 @@ sudo ./AutoRestart.sh
 ### Method 2: Run directly with curl and bash (Quick)
 
 ```bash
-sudo bash <(curl -sSL https://raw.githubusercontent.com/KanekiDevPro/Auto-Restart/main/beta.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/KanekiDevPro/Auto-Restart/main/beta.sh)
 ```
 
 > **Note:** This method requires `sudo` because the script needs root privileges to manage systemd services.
