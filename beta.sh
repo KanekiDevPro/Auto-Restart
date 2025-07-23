@@ -1,32 +1,26 @@
 #!/bin/bash
 
-# --- Colors & Styles ---
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
-BOLD='\033[1m'
+# Define colors - Otaku-friendly theme!
+MAGENTA='\033[0;35m'  # Purple/Magenta for borders
+CYAN='\033[0;36m'     # Cyan/Light Blue for text
+RED='\033[0;31m'      # Red for error/warning
+GREEN='\033[0;32m'    # Green for success
+YELLOW='\033[0;33m'   # Yellow for warnings/tips
+NC='\033[0m'          # No Color (reset)
+BOLD='\033[1m'        # Bold text
 
-VERSION="1.1.0"
-
-# --- Logging helpers ---
-log_error()   { echo -e "${RED}${BOLD}❌ $1${NC}"; }
-log_success() { echo -e "${GREEN}${BOLD}✅ $1${NC}"; }
-log_info()    { echo -e "${CYAN}$1${NC}"; }
-log_warn()    { echo -e "${YELLOW}⚠️ $1${NC}"; }
-
-# --- Root check ---
+# --- Check for root privileges ---
 if [[ $EUID -ne 0 ]]; then
-    log_error "This script must be run as root."
-    log_info "Run: ${BOLD}sudo $0${NC}"
+    echo -e "${RED}${BOLD}❌ This script must be run with root privileges (sudo).${NC}"
+    echo -e "${CYAN}Please run the command as: ${BOLD}sudo ./kaneki_script.sh${NC}"
     exit 1
 fi
 
-# --- Main Menu (ASCII/OTAKU BANNER STYLE) ---
+# --- Function to display the main menu ---
 display_main_menu() {
-    clear
+    clear # Clear the screen for a clean display
+
+    # ASCII Art Banner
     echo -e "${MAGENTA}${BOLD}"
     echo "   _         _            __           _             _   "
     echo "  /_\  _   _| |_ ___     /__\ ___  ___| |_ __ _ _ __| |_ "
@@ -35,77 +29,99 @@ display_main_menu() {
     echo "\\_/ \\_/\\__,_|\\__\\___/  \\/ \\_/\\___||___/\\__\\__,_|_|   \\__|"
     echo "                                                         "
     echo -e "${CYAN}GitHub: KanekiDevPro ${NC}"
-    echo -e "${CYAN}Version: $VERSION${NC}"
+    echo -e "${CYAN}Version: 1.0.0${NC}"
     echo -e "${MAGENTA}${BOLD}+-----------------------------------------------------------------------------+${NC}"
-    echo -e "${CYAN}${BOLD}| PLEASE CHOOSE AN OPTION:                                                    |${NC}"
+    echo -e "${CYAN}${BOLD}| PLEASE CHOOSE THE OPTION:                                                   |${NC}"
     echo -e "${MAGENTA}${BOLD}+-----------------------------------------------------------------------------+${NC}"
-    echo -e "${CYAN}| 1 - Configure Auto Restart for a Systemd Service                            |${NC}"
-    echo -e "${CYAN}| 2 - Remove Auto Restart Configuration                                       |${NC}"
-    echo -e "${CYAN}| 0 - Exit                                                                    |${NC}"
+    echo -e "${CYAN}| 1 - Configure Auto Restart for Systemd Service                              |${NC}"
+    echo -e "${CYAN}| 2 - Remove Auto Restart Configuration                                       |${NC}" 
+    echo -e "${CYAN}| 0 - Exit The Matrix                                                         |${NC}"
     echo -e "${MAGENTA}${BOLD}+-----------------------------------------------------------------------------+${NC}"
-    echo -ne "${CYAN}| Enter your choice: ${NC}"
+    echo -e "${CYAN}| Enter your choice: ${NC}\c"
 }
 
-# --- Configure auto restart ---
+# --- Function for the Auto Restart Systemd Service Setup ---
 configure_auto_restart_service() {
-    clear
+    clear # Clear screen for this specific utility
+
     echo -e "${MAGENTA}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${CYAN}${BOLD} 🔁 Auto Restart Systemd Service Setup${NC}"
     echo -e "${MAGENTA}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-    log_info "Tip: To find your service name, run:"
-    echo -e "${CYAN}  systemctl list-units --type=service | grep x${NC}"
-    log_info "Example: x-ui.service, nginx.service, etc."
-    echo
+    # Show help for finding service
+    echo -e "${CYAN}🔍 Tip: To find your service name, run:${NC}"
+    echo -e "${CYAN}    systemctl list-units --type=service | grep your_service${NC}"
+    echo -e "${CYAN}Example: x-ui.service, nginx.service, etc.${NC}"
+    echo -e "${MAGENTA}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-    read -p "$(echo -e "${CYAN}Enter the exact service name (e.g. x-ui.service): ${NC}")" SERVICE_NAME
-    [[ -z "$SERVICE_NAME" ]] && log_error "Service name cannot be empty!" && sleep 2 && return
+    # Ask for service name
+    read -p "$(echo -e "${CYAN}📦 Enter the exact service name (e.g. x-ui.service): ${NC}")" SERVICE_NAME
 
-    if ! systemctl list-unit-files --type=service --all | grep -qw "$SERVICE_NAME"; then
-        log_error "Service '$SERVICE_NAME' not found on this system!"
-        sleep 2; return
+    # Validate service name input
+    if [[ -z "$SERVICE_NAME" ]]; then
+        echo -e "${RED}${BOLD}❌ Service name cannot be empty. Returning to main menu.${NC}"
+        sleep 2
+        return
+    fi
+
+    # Check if the service actually exists (checks if unit file exists and is recognized by systemctl)
+    if ! systemctl list-unit-files --type=service --all | grep -q "^${SERVICE_NAME}\s"; then
+        echo -e "${RED}${BOLD}❌ Error: Service '$SERVICE_NAME' does not exist on this system.${NC}"
+        echo -e "${RED}Please verify the service name and try again.${NC}"
+        sleep 3
+        return # Go back to the main menu loop
     fi
 
     BASE_NAME=$(echo "$SERVICE_NAME" | sed 's/\.service$//')
-    unset FIXED_INTERVAL
 
+    # Ask for restart method
     echo -e "${MAGENTA}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    log_info "How often do you want to restart?"
-    echo -e "${CYAN}1) At a specific time every day (e.g. 03:00)"
-    echo -e "2) Every X hours (e.g. every 8 hours)${NC}"
+    echo -e "${CYAN}⏱ How often do you want to restart?${NC}"
+    echo -e "${CYAN}1) At a specific time every day (e.g. 03:00)${NC}"
+    echo -e "${CYAN}2) Every X hours (e.g. every 8 hours)${NC}"
     read -p "$(echo -e "${CYAN}Choose option (1 or 2): ${NC}")" TIME_MODE
 
     if [[ "$TIME_MODE" == "1" ]]; then
-        read -p "$(echo -e "${CYAN}Enter the time (24h format, e.g. 03:00): ${NC}")" TIME_VALUE
-        [[ -z "$TIME_VALUE" ]] && log_error "Time cannot be empty!" && sleep 2 && return
+        read -p "$(echo -e "${CYAN}🕒 Enter the time (24h format, e.g. 03:00): ${NC}")" TIME_VALUE
+        if [[ -z "$TIME_VALUE" ]]; then
+            echo -e "${RED}${BOLD}❌ Time cannot be empty. Returning to main menu.${NC}"
+            sleep 2
+            return
+        fi
+        # Basic time format validation (e.g., 00:00 to 23:59)
         if ! [[ "$TIME_VALUE" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
-            log_error "Invalid time format (e.g., 03:00)."
-            sleep 2; return
+            echo -e "${RED}${BOLD}❌ Invalid time format (use HH:MM format, e.g., 03:00). Returning to main menu.${NC}"
+            sleep 2
+            return
         fi
         ONCALENDAR="*-*-* $TIME_VALUE:00"
     elif [[ "$TIME_MODE" == "2" ]]; then
-        read -p "$(echo -e "${CYAN}Enter the interval in hours (e.g. 8): ${NC}")" TIME_VALUE
+        read -p "$(echo -e "${CYAN}🔁 Enter the interval in hours (e.g. 8): ${NC}")" TIME_VALUE
         if ! [[ "$TIME_VALUE" =~ ^[0-9]+$ ]] || (( TIME_VALUE == 0 )); then
-            log_error "Interval must be a positive number."
-            sleep 2; return
+            echo -e "${RED}${BOLD}❌ Interval must be a positive number. Returning to main menu.${NC}"
+            sleep 2
+            return
         fi
-        ONCALENDAR="hourly"
+        ONCALENDAR="*-*-*"
         FIXED_INTERVAL="yes"
     else
-        log_error "Invalid option."
-        sleep 2; return
+        echo -e "${RED}${BOLD}❌ Invalid option. Returning to main menu.${NC}"
+        sleep 2
+        return # Go back to the main menu loop
     fi
 
+    # Step 1: create script
     SCRIPT_PATH="/usr/local/bin/restart-${BASE_NAME}.sh"
-    log_info "Creating script: $SCRIPT_PATH"
+    echo -e "${CYAN}📁 Creating script: ${BOLD}$SCRIPT_PATH${NC}"
     cat <<EOF > "$SCRIPT_PATH"
 #!/bin/bash
 systemctl restart $SERVICE_NAME
 EOF
     chmod +x "$SCRIPT_PATH"
 
+    # Step 2: systemd service
     SERVICE_FILE="/etc/systemd/system/restart-${BASE_NAME}.service"
-    log_info "Creating systemd service: $SERVICE_FILE"
+    echo -e "${CYAN}🛠 Creating systemd service: ${BOLD}$SERVICE_FILE${NC}"
     cat <<EOF > "$SERVICE_FILE"
 [Unit]
 Description=Auto Restart for $SERVICE_NAME
@@ -115,8 +131,10 @@ Type=oneshot
 ExecStart=$SCRIPT_PATH
 EOF
 
+    # Step 3: systemd timer
     TIMER_FILE="/etc/systemd/system/restart-${BASE_NAME}.timer"
-    log_info "Creating systemd timer: $TIMER_FILE"
+    echo -e "${CYAN}⏱ Creating systemd timer: ${BOLD}$TIMER_FILE${NC}"
+
     if [[ "$FIXED_INTERVAL" == "yes" ]]; then
     cat <<EOF > "$TIMER_FILE"
 [Unit]
@@ -144,51 +162,76 @@ WantedBy=timers.target
 EOF
     fi
 
-    log_info "Enabling and starting timer..."
-    systemctl daemon-reexec
-    systemctl daemon-reload
+    # Step 4: Enable timer
+    echo -e "${CYAN}🚀 Enabling and starting timer...${NC}"
+    systemctl daemon-reload # Reload systemd to pick up new unit files
     systemctl enable --now "restart-${BASE_NAME}.timer"
 
-    echo -e "${MAGENTA}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    log_success "Auto-restart configured for: $SERVICE_NAME"
-    log_info "Restart style: $([ "$FIXED_INTERVAL" == "yes" ] && echo "Every $TIME_VALUE hours" || echo "Daily at $TIME_VALUE")"
-    log_info "Timer status:"
-    systemctl list-timers | grep "restart-${BASE_NAME}"
-    echo -e "${MAGENTA}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-
-    read -p "$(echo -e "${CYAN}Test the restart now? (y/n): ${NC}")" do_test
-    if [[ "$do_test" =~ ^[Yy]$ ]]; then
-        log_info "Testing service restart for $SERVICE_NAME..."
-        systemctl start "restart-${BASE_NAME}.service"
-        log_info "Last 10 lines of logs from $SERVICE_NAME:"
-        journalctl -u "$SERVICE_NAME" -n 10 --no-pager
+    # Check if timer was successfully enabled
+    if systemctl is-enabled "restart-${BASE_NAME}.timer" &>/dev/null; then
+        echo -e "${GREEN}${BOLD}✅ Timer successfully enabled and started!${NC}"
     else
-        log_success "Done! Your service will restart automatically as scheduled."
+        echo -e "${RED}${BOLD}❌ Failed to enable timer. Check systemd logs.${NC}"
+        echo -e "${CYAN}Run: journalctl -u restart-${BASE_NAME}.timer${NC}"
+        sleep 3
+        return
     fi
 
-    log_info "Press any key to return to main menu..."
-    read -n 1 -s
+    # Final info
+    echo -e "${MAGENTA}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}${BOLD}✅ Auto-restart configured for: ${SERVICE_NAME}${NC}"
+    echo -e "${CYAN}🔁 Restart style: $([ "$FIXED_INTERVAL" == "yes" ] && echo "Every $TIME_VALUE hours" || echo "Daily at $TIME_VALUE")${NC}"
+    echo -e "${CYAN}🔧 Timer status:${NC}"
+    systemctl list-timers | grep "restart-${BASE_NAME}" || echo -e "${YELLOW}Timer not visible in current list.${NC}"
+    echo -e "${MAGENTA}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+    # Optional test - با اصلاح متغیر
+    read -p "$(echo -e "${CYAN}⚙️ Do you want to test the restart now? (y/n): ${NC}")" do_test
+    if [[ "$do_test" =~ ^[Yy]$ ]]; then
+        echo -e "${CYAN}Testing service restart for ${BOLD}$SERVICE_NAME${NC}..."
+        systemctl start "restart-${BASE_NAME}.service"
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✅ Service restarted successfully!${NC}"
+        else
+            echo -e "${RED}❌ Failed to restart service. Check logs.${NC}"
+        fi
+        echo -e "${CYAN}📄 Last 10 lines of logs from ${BOLD}$SERVICE_NAME${NC}:"
+        journalctl -u "$SERVICE_NAME" -n 10 --no-pager
+    else
+        echo -e "${GREEN}🎉 Done! Your service will restart automatically as scheduled.${NC}"
+    fi
+
+    echo -e "${CYAN}Press any key to return to main menu...${NC}"
+    read -n 1 -s # Wait for any key press
 }
 
-# --- Remove auto-restart config ---
+# --- Function to remove an existing Auto Restart Configuration ---
 remove_auto_restart_configuration() {
     clear
     echo -e "${MAGENTA}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${RED}${BOLD} 🗑️ Remove Auto Restart Configuration${NC}"
     echo -e "${MAGENTA}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-    log_info "Timers configured by this script:"
-    CONFIGURED_TIMERS=$(systemctl list-timers --no-pager | grep "restart-" | awk '{print $NF}' | sed 's/^restart-//; s/\.timer$//; s/$/\.service/' | sort -u)
+    echo -e "${CYAN}💡 Timers configured by this script:${NC}"
+    # List only the base service names that have a timer configured by this script
+    CONFIGURED_TIMERS=$(systemctl list-timers --no-pager 2>/dev/null | grep "restart-" | awk '{print $NF}' | sed 's/^restart-//; s/\.timer$//; s/$/\.service/' | sort -u)
     if [[ -z "$CONFIGURED_TIMERS" ]]; then
-        log_warn "No configured timers found."
+        echo -e "${YELLOW}  (No configured timers found.)${NC}"
     else
-        echo -e "${CYAN}----------------------------------------${NC}"
-        echo -e "${CONFIGURED_TIMERS}" | nl -w2 -s'. ' | sed 's/^/  /'
-        echo -e "${CYAN}----------------------------------------${NC}"
+        echo -e "${CYAN}${BOLD}----------------------------------------${NC}"
+        echo -e "${CONFIGURED_TIMERS}" | nl -w2 -s'. ' | sed 's/^/  /' # Add numbering and indentation
+        echo -e "${CYAN}${BOLD}----------------------------------------${NC}"
     fi
+    echo -e "${MAGENTA}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-    read -p "$(echo -e "${CYAN}Enter the exact service name (e.g. x-ui.service): ${NC}")" SERVICE_NAME
-    [[ -z "$SERVICE_NAME" ]] && log_error "Service name cannot be empty!" && sleep 2 && return
+    read -p "$(echo -e "${CYAN}📦 Enter the exact service name that was configured (e.g. x-ui.service): ${NC}")" SERVICE_NAME
+
+    # Validate service name input
+    if [[ -z "$SERVICE_NAME" ]]; then
+        echo -e "${RED}${BOLD}❌ Service name cannot be empty. Returning to main menu.${NC}"
+        sleep 2
+        return
+    fi
 
     BASE_NAME=$(echo "$SERVICE_NAME" | sed 's/\.service$//')
     TIMER_UNIT="restart-${BASE_NAME}.timer"
@@ -197,34 +240,74 @@ remove_auto_restart_configuration() {
     TIMER_FILE="/etc/systemd/system/${TIMER_UNIT}"
     SERVICE_FILE="/etc/systemd/system/${SERVICE_UNIT}"
 
+    # Check if the timer/service files actually exist for removal
     if [[ ! -f "$TIMER_FILE" && ! -f "$SERVICE_FILE" && ! -f "$SCRIPT_PATH" ]]; then
-        log_error "No auto-restart configuration found for service '$SERVICE_NAME'."
-        sleep 2; return
+        echo -e "${RED}${BOLD}❌ Error: No auto-restart configuration found for service '$SERVICE_NAME'.${NC}"
+        echo -e "${RED}Please ensure the service name is correct and it was previously configured.${NC}"
+        sleep 3
+        return # Go back to the main menu loop
     fi
 
-    log_info "Attempting to remove configuration for: $SERVICE_NAME"
-    if systemctl is-active --quiet "$TIMER_UNIT" || systemctl is-enabled --quiet "$TIMER_UNIT"; then
-        systemctl stop "$TIMER_UNIT"
-        systemctl disable "$TIMER_UNIT"
-    fi
-    [[ -f "$TIMER_FILE"   ]] && rm -f "$TIMER_FILE"   && log_info "Timer file deleted."
-    [[ -f "$SERVICE_FILE" ]] && rm -f "$SERVICE_FILE" && log_info "Service file deleted."
-    [[ -f "$SCRIPT_PATH"  ]] && rm -f "$SCRIPT_PATH"  && log_info "Script file deleted."
-    systemctl daemon-reload
+    echo -e "${CYAN}Attempting to remove configuration for: ${BOLD}$SERVICE_NAME${NC}"
 
-    log_success "Removal process complete. Please verify using 'systemctl list-timers'."
-    log_info "Press any key to return to main menu..."
-    read -n 1 -s
+    # Stop and disable timer if it exists and is active/enabled
+    if systemctl is-active --quiet "$TIMER_UNIT" 2>/dev/null || systemctl is-enabled --quiet "$TIMER_UNIT" 2>/dev/null; then
+        echo -e "${CYAN}Stopping and disabling timer: ${BOLD}$TIMER_UNIT${NC}"
+        systemctl stop "$TIMER_UNIT" 2>/dev/null
+        systemctl disable "$TIMER_UNIT" 2>/dev/null
+    else
+        echo -e "${YELLOW}Warning: Timer '$TIMER_UNIT' not active or enabled. Proceeding with file deletion.${NC}"
+    fi
+
+    # Delete timer file
+    if [ -f "$TIMER_FILE" ]; then
+        echo -e "${CYAN}Deleting timer file: ${BOLD}$TIMER_FILE${NC}"
+        rm -f "$TIMER_FILE"
+    else
+        echo -e "${YELLOW}Warning: Timer file not found: ${BOLD}$TIMER_FILE${NC}"
+    fi
+
+    # Delete service file
+    if [ -f "$SERVICE_FILE" ]; then
+        echo -e "${CYAN}Deleting service file: ${BOLD}$SERVICE_FILE${NC}"
+        rm -f "$SERVICE_FILE"
+    else
+        echo -e "${YELLOW}Warning: Service file not found: ${BOLD}$SERVICE_FILE${NC}"
+    fi
+
+    # Delete script file
+    if [ -f "$SCRIPT_PATH" ]; then
+        echo -e "${CYAN}Deleting script file: ${BOLD}$SCRIPT_PATH${NC}"
+        rm -f "$SCRIPT_PATH"
+    else
+        echo -e "${YELLOW}Warning: Script file not found: ${BOLD}$SCRIPT_PATH${NC}"
+    fi
+
+    systemctl daemon-reload # Reload systemd to pick up deleted files and ensure consistency
+    echo -e "${GREEN}${BOLD}✅ Removal process complete. Please verify using 'systemctl list-timers'.${NC}"
+    echo -e "${CYAN}Press any key to return to main menu...${NC}"
+    read -n 1 -s # Wait for any key press
 }
 
 # --- Main program loop ---
 while true; do
     display_main_menu
-    read -r choice
+    read choice
+
     case "$choice" in
-        1) configure_auto_restart_service ;;
-        2) remove_auto_restart_configuration ;;
-        0) log_info "Exiting. See you soon!"; exit 0 ;;
-        *) log_error "Invalid choice. Please enter a valid option (0, 1, or 2)."; sleep 2 ;;
+        1)
+            configure_auto_restart_service
+            ;;
+        2)
+            remove_auto_restart_configuration
+            ;;
+        0)
+            echo -e "${CYAN}Exiting The Matrix. See you soon!${NC}"
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}${BOLD}Invalid choice. Please enter a valid option (0, 1, or 2).${NC}"
+            sleep 2 # Pause to let the user read the message
+            ;;
     esac
 done
